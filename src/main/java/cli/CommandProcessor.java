@@ -8,7 +8,7 @@ import engine.SearchResult;
 import engine.Evaluator;
 
 public class CommandProcessor {
-
+    private int searchDepth = 8;
     private Board board = new Board();
 
     public void execute(String line) {
@@ -100,7 +100,7 @@ public class CommandProcessor {
 
                     SearchResult result = SearchEngine.bestMove(
                             board,
-                            8);
+                            searchDepth);
 
                     System.out.println(
                             "Best move: "
@@ -115,7 +115,7 @@ public class CommandProcessor {
 
                     SearchResult result = SearchEngine.bestMove(
                             board,
-                            8);
+                            searchDepth);
 
                     MoveResult moveResult = KalahRules.applyMove(
                             board,
@@ -131,6 +131,15 @@ public class CommandProcessor {
                     System.out.println(
                             "Score "
                                     + result.score());
+                }
+
+                case "depth" -> {
+
+                    searchDepth = Integer.parseInt(parts[1]);
+
+                    System.out.println(
+                            "Search depth set to "
+                                    + searchDepth);
                 }
 
                 default ->

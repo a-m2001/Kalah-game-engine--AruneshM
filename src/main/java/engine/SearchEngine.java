@@ -1,14 +1,17 @@
 package engine;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SearchEngine {
 
     private static final int INF = 1_000_000;
-
+    private static long nodes;
+    
     public static SearchResult bestMove(
             Board board,
             int depth
     ) {
-
+        List<Integer> bestLine = new ArrayList<>();
         int bestMove = -1;
         int bestScore = -INF;
 
@@ -37,12 +40,15 @@ public class SearchEngine {
 
                 bestScore = score;
                 bestMove = move;
+                bestLine.clear();
+                bestLine.add(move);
             }
         }
 
         return new SearchResult(
-                bestMove,
-                bestScore
+            bestMove,
+            bestScore,
+            bestLine
         );
     }
 

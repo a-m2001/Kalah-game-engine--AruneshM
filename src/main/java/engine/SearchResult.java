@@ -1,7 +1,10 @@
 package engine;
 
+import java.util.List;
+
 public record SearchResult(
         int move,
-        int score
+        int score,
+        List<Integer> line
 ) {
 }
