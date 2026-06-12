@@ -8,6 +8,7 @@ public class SearchEngine {
 
     private static final int INF = 1_000_000;
     private static long nodes;
+    public static boolean DEBUG = false;
     private static final Map<Long, TTEntry> tt = new HashMap<>();
 
     public static long getNodes() {
@@ -191,12 +192,13 @@ public static SearchResult iterativeDeepening(
                         board,
                         depth
                 );
-
+        if(DEBUG){
         System.out.println(
                 "Depth "
                 + depth
                 + " complete"
         );
+}      
     }
 
     return best;

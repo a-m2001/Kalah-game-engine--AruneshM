@@ -98,7 +98,7 @@ public class CommandProcessor {
 
                     System.out.println(
                             "Thinking...");
-
+                    SearchEngine.DEBUG = false;
                     lastSearch = SearchEngine.iterativeDeepening(
                             board,
                             searchDepth);
@@ -121,7 +121,7 @@ public class CommandProcessor {
 case "playbest" -> {
 
     if(lastSearch == null) {
-
+        SearchEngine.DEBUG = false;
         lastSearch =
             SearchEngine.iterativeDeepening(
                 board,
