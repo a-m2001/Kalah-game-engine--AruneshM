@@ -18,51 +18,64 @@ public class SearchEngine {
             Board board,
             int depth
     ) {
-        List<Integer> bestLine = new ArrayList<>();
-        int bestMove = -1;
-        int bestScore = -INF;
-        nodes = 0;
+nodes = 0;
 
-        for(int move=0; move<6; move++) {
+int bestMove = -1;
+int bestScore = -INF;
 
-            if(board.pits()[move] == 0)
-                continue;
+List<Integer> bestLine =
+        new ArrayList<>();
 
-            MoveResult result =
-                    KalahRules.applyMove(
-                            board,
-                            move,
-                            true
-                    );
+for(int move=0; move<6; move++) {
 
-int nextDepth =
-        result.extraTurn()
-                ? depth
-                : depth - 1;
+    if(board.pits()[move] == 0)
+        continue;
 
-int score =
-        alphaBeta(
-                result.board(),
-                nextDepth,
-                -INF,
-                INF,
-                result.extraTurn()
+    MoveResult result =
+            KalahRules.applyMove(
+                    board,
+                    move,
+                    true
+            );
+
+    int nextDepth =
+            result.extraTurn()
+                    ? depth
+                    : depth - 1;
+
+    PVResult child =
+            alphaBetaPV(
+                    result.board(),
+                    nextDepth,
+                    -INF,
+                    INF,
+                    result.extraTurn()
+            );
+
+    if(child.score() > bestScore) {
+
+        bestScore =
+                child.score();
+
+        bestMove =
+                move;
+
+        bestLine =
+                new ArrayList<>();
+
+        bestLine.add(move);
+
+        bestLine.addAll(
+                child.line()
         );
+    }
+}
 
-            if(score > bestScore) {
-
-                bestScore = score;
-                bestMove = move;
-                bestLine.clear();
-                bestLine.add(move);
-            }
-        }
-
-        return new SearchResult(
-            bestMove,
-            bestScore,
-            bestLine
-        );
+return new SearchResult(
+        bestMove,
+        bestScore,
+        bestLine
+);
     }
 
     private static int alphaBeta(
@@ -218,6 +231,164 @@ public static SearchResult iterativeDeepening(
     return best;
 }
 
+
+private static PVResult alphaBetaPV(
+        Board board,
+        int depth,
+        int alpha,
+        int beta,
+        boolean maximizing
+) {
+
+    nodes++;
+
+    long key = board.hash();
+
+    TTEntry entry = tt.get(key);
+
+    if(entry != null &&
+       entry.depth() >= depth) {
+
+        return new PVResult(
+                entry.score(),
+                new ArrayList<>()
+        );
+    }
+
+    if(depth == 0 || board.isGameOver()) {
+
+        int eval =
+                Evaluator.evaluate(board);
+
+        return new PVResult(
+                eval,
+                new ArrayList<>()
+        );
+    }
+
+    List<Integer> bestLine =
+            new ArrayList<>();
+
+    if(maximizing) {
+
+        int bestScore = -INF;
+
+        for(int move=0; move<6; move++) {
+
+            if(board.pits()[move] == 0)
+                continue;
+
+            MoveResult result =
+                    KalahRules.applyMove(
+                            board,
+                            move,
+                            true
+                    );
+
+            int nextDepth =
+                    result.extraTurn()
+                            ? depth
+                            : depth - 1;
+
+            PVResult child =
+                    alphaBetaPV(
+                            result.board(),
+                            nextDepth,
+                            alpha,
+                            beta,
+                            result.extraTurn()
+                    );
+
+            if(child.score() > bestScore) {
+
+                bestScore =
+                        child.score();
+
+                bestLine =
+                        new ArrayList<>();
+
+                bestLine.add(move);
+                bestLine.addAll(
+                        child.line()
+                );
+            }
+
+            alpha =
+                    Math.max(
+                            alpha,
+                            bestScore
+                    );
+
+            if(beta <= alpha)
+                break;
+        }
+
+        return new PVResult(
+                bestScore,
+                bestLine
+        );
+    }
+
+    int bestScore = INF;
+
+    for(int move=7; move<13; move++) {
+
+        if(board.pits()[move] == 0)
+            continue;
+
+        MoveResult result =
+                KalahRules.applyMove(
+                        board,
+                        move,
+                        false
+                );
+
+        int nextDepth =
+                result.extraTurn()
+                        ? depth
+                        : depth - 1;
+
+        PVResult child =
+                alphaBetaPV(
+                        result.board(),
+                        nextDepth,
+                        alpha,
+                        beta,
+                        !result.extraTurn()
+                );
+
+        if(child.score() < bestScore) {
+
+            bestScore =
+                    child.score();
+
+            bestLine =
+                    new ArrayList<>();
+
+            bestLine.add(
+                    move
+            );
+
+            bestLine.addAll(
+                    child.line()
+            );
+        }
+
+        beta =
+                Math.min(
+                        beta,
+                        bestScore
+                );
+
+        if(beta <= alpha)
+            break;
+    }
+
+    return new PVResult(
+            bestScore,
+            bestLine
+    );
+}
 
 }
 

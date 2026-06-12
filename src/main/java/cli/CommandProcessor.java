@@ -112,10 +112,13 @@ public class CommandProcessor {
                             "Score: "
                                     + result.score());
 
-                        System.out.println(
-        "Nodes: "
-        + SearchEngine.getNodes()
-);
+                    System.out.println(
+                            "PV: "
+                                    + result.line());
+
+                    System.out.println(
+                             "Nodes: "
+                                    + SearchEngine.getNodes());
                 }
 
 case "playbest" -> {
