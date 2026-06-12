@@ -29,26 +29,16 @@ private void printPV(Board board, List<Integer> pv) {
     for (int move : pv) {
 
         if (myTurn) {
-
-            System.out.println(
-                    "You -> pit " + move
-            );
+            System.out.println("You -> pit " + move);
 
         } else {
 
             int oppPit = 12 - move;
 
-            System.out.println(
-                    "Opp -> pit " + oppPit
-            );
+            System.out.println("Opp -> pit " + oppPit);
         }
 
-        MoveResult result =
-                KalahRules.applyMove(
-                        current,
-                        move,
-                        myTurn
-                );
+        MoveResult result = KalahRules.applyMove(current, move, myTurn);
 
         current = result.board();
 
@@ -72,11 +62,8 @@ private void printPV(Board board, List<Integer> pv) {
             switch (parts[0]) {
 
                 case "new" -> {
-
                     board = new Board();
-
-                    System.out.println(
-                            "New game started.");
+                    System.out.println("New game started.");
                 }
 
                 case "board" -> board.print();
@@ -85,41 +72,26 @@ private void printPV(Board board, List<Integer> pv) {
 
                     int pit = Integer.parseInt(parts[1]);
 
-                    MoveResult result = KalahRules.applyMove(
-                            board,
-                            pit,
-                            true);
-
+                    MoveResult result = KalahRules.applyMove(board, pit, true);
                     board = result.board();
-
-                    System.out.println(
-                            "Your move applied.");
+                    System.out.println("Your move applied.");
 
                     if (result.extraTurn()) {
-                        System.out.println(
-                                "You earned an extra turn.");
+                        System.out.println("You earned an extra turn.");
                     }
                 }
 
                 case "opp" -> {
 
                     int pit = Integer.parseInt(parts[1]);
-
                     int internal = 12 - pit;
-
-                    MoveResult result = KalahRules.applyMove(
-                            board,
-                            internal,
-                            false);
-
+                    MoveResult result = KalahRules.applyMove(board, internal, false);
                     board = result.board();
 
-                    System.out.println(
-                            "Opponent move applied.");
+                    System.out.println("Opponent move applied.");
 
                     if (result.extraTurn()) {
-                        System.out.println(
-                                "Opponent earned an extra turn.");
+                        System.out.println("Opponent earned an extra turn.");
                     }
                 }
 
@@ -127,25 +99,21 @@ private void printPV(Board board, List<Integer> pv) {
 
                     int[] p = board.pits();
 
-                    System.out.println(
-                            "Your Store: " + p[6]);
+                    System.out.println("Your Store: " + p[6]);
 
-                    System.out.println(
-                            "Opponent Store: " + p[13]);
+                    System.out.println("Opponent Store: " + p[13]);
                 }
 
                 case "eval" -> {
 
                     int score = Evaluator.evaluate(board);
 
-                    System.out.println(
-                            "Evaluation = " + score);
+                    System.out.println("Evaluation = " + score);
                 }
 
                 case "best" -> {
 
-                    System.out.println(
-                            "Thinking...");
+                    System.out.println("Thinking...");
                     SearchEngine.DEBUG = false;
                     lastSearch = SearchEngine.iterativeDeepening(
                             board,
@@ -153,31 +121,18 @@ private void printPV(Board board, List<Integer> pv) {
                     SearchResult result = lastSearch;
 
                     if(SearchEngine.wasBookMoveUsed()) {
-                        System.out.println(
-                                "Book Move Used"
-                        );
+                        System.out.println("Book Move Used");
                     }
                     
-                    System.out.println(
-                            "Best move: "
-                                    + result.move());
+                    System.out.println("Best move: " + result.move());
 
-                    System.out.println(
-                            "Score: "
-                                    + result.score());
+                    System.out.println("Score: " + result.score());
 
-printPV(
-        board,
-        result.line()
-);
+                    printPV(board,result.line());
 
-                    System.out.println(
-                             "Nodes: "
-                                    + SearchEngine.getNodes());
+                    System.out.println("Nodes: " + SearchEngine.getNodes());
 
-                    System.out.println(
-                            "TT Hits: "
-                                    + SearchEngine.getTTHits());
+                    System.out.println("TT Hits: " + SearchEngine.getTTHits());
                 }
 
                 case "benchmark" -> {
@@ -236,15 +191,12 @@ printPV(
                     );
                 }
 
-case "playbest" -> {
+                case "playbest" -> {
 
-    if(lastSearch == null) {
-        SearchEngine.DEBUG = false;
-        lastSearch =
-            SearchEngine.iterativeDeepening(
-                board,
-                searchDepth
-            );
+                if(lastSearch == null) {
+                SearchEngine.DEBUG = false;
+                        lastSearch =
+                SearchEngine.iterativeDeepening(board, searchDepth);
     }
 
     MoveResult moveResult =
