@@ -86,7 +86,10 @@ return new SearchResult(
             boolean maximizing
     ) {
         nodes++;
-        long key = board.hash();
+        long key =
+        Zobrist.hash(
+                board
+        );
         TTEntry entry = tt.get(key);
 
         if (entry != null && entry.depth() >= depth) {
@@ -242,7 +245,10 @@ private static PVResult alphaBetaPV(
 
     nodes++;
 
-    long key = board.hash();
+    long key =
+        Zobrist.hash(
+                board
+        );
 
     TTEntry entry = tt.get(key);
 
