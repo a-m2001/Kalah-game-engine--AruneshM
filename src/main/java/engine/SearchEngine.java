@@ -35,14 +35,19 @@ public class SearchEngine {
                             true
                     );
 
-            int score =
-                    alphaBeta(
-                            result.board(),
-                            depth - 1,
-                            -INF,
-                            INF,
-                            result.extraTurn()
-                    );
+int nextDepth =
+        result.extraTurn()
+                ? depth
+                : depth - 1;
+
+int score =
+        alphaBeta(
+                result.board(),
+                nextDepth,
+                -INF,
+                INF,
+                result.extraTurn()
+        );
 
             if(score > bestScore) {
 
@@ -96,14 +101,19 @@ public class SearchEngine {
                                 true
                         );
 
-                int score =
-                        alphaBeta(
-                                result.board(),
-                                depth - 1,
-                                alpha,
-                                beta,
-                                result.extraTurn()
-                        );
+int nextDepth =
+        result.extraTurn()
+                ? depth
+                : depth - 1;
+
+int score =
+        alphaBeta(
+                result.board(),
+                nextDepth,
+                alpha,
+                beta,
+                result.extraTurn()
+        );
 
                 value = Math.max(
                         value,
@@ -141,15 +151,19 @@ public class SearchEngine {
                             move,
                             false
                     );
+int nextDepth =
+        result.extraTurn()
+                ? depth
+                : depth - 1;
 
-            int score =
-                    alphaBeta(
-                            result.board(),
-                            depth - 1,
-                            alpha,
-                            beta,
-                            !result.extraTurn()
-                    );
+int score =
+        alphaBeta(
+                result.board(),
+                nextDepth,
+                alpha,
+                beta,
+                !result.extraTurn()
+        );
 
             value = Math.min(
                     value,
