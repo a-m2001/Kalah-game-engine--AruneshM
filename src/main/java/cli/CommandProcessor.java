@@ -10,6 +10,7 @@ import engine.Evaluator;
 public class CommandProcessor {
     private int searchDepth = 8;
     private Board board = new Board();
+    private SearchResult lastSearch;
 
     public void execute(String line) {
 
@@ -98,10 +99,11 @@ public class CommandProcessor {
                     System.out.println(
                             "Thinking...");
 
-                    SearchResult result = SearchEngine.iterativeDeepening(
+                    lastSearch = SearchEngine.iterativeDeepening(
                             board,
                             searchDepth);
-
+                    SearchResult result = lastSearch;
+                    
                     System.out.println(
                             "Best move: "
                                     + result.move());
@@ -116,27 +118,33 @@ public class CommandProcessor {
 );
                 }
 
-                case "playbest" -> {
+case "playbest" -> {
 
-                    SearchResult result = SearchEngine.iterativeDeepening(
-                            board,
-                            searchDepth);
+    if(lastSearch == null) {
 
-                    MoveResult moveResult = KalahRules.applyMove(
-                            board,
-                            result.move(),
-                            true);
+        lastSearch =
+            SearchEngine.iterativeDeepening(
+                board,
+                searchDepth
+            );
+    }
 
-                    board = moveResult.board();
+    MoveResult moveResult =
+        KalahRules.applyMove(
+            board,
+            lastSearch.move(),
+            true
+        );
 
-                    System.out.println(
-                            "Played move "
-                                    + result.move());
+    board = moveResult.board();
 
-                    System.out.println(
-                            "Score "
-                                    + result.score());
-                }
+    System.out.println(
+        "Played move "
+        + lastSearch.move()
+    );
+
+    lastSearch = null;
+}
 
                 case "depth" -> {
 
