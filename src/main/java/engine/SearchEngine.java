@@ -3,6 +3,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
+import engine.MoveOrdering;
 
 public class SearchEngine {
 
@@ -26,10 +27,11 @@ int bestScore = -INF;
 List<Integer> bestLine =
         new ArrayList<>();
 
-for(int move=0; move<6; move++) {
-
-    if(board.pits()[move] == 0)
-        continue;
+for(int move :
+        MoveOrdering.orderedMoves(
+                board,
+                true
+        )) {
 
     MoveResult result =
             KalahRules.applyMove(
@@ -105,10 +107,11 @@ return new SearchResult(
 
             int value = -INF;
 
-            for(int move=0; move<6; move++) {
-
-                if(board.pits()[move] == 0)
-                    continue;
+for(int move :
+        MoveOrdering.orderedMoves(
+                board,
+                true
+        )) {
 
                 MoveResult result =
                         KalahRules.applyMove(
@@ -156,10 +159,11 @@ int score =
 
         int value = INF;
 
-        for(int move=7; move<13; move++) {
-
-            if(board.pits()[move] == 0)
-                continue;
+for(int move :
+        MoveOrdering.orderedMoves(
+                board,
+                false
+        )) {
 
             MoveResult result =
                     KalahRules.applyMove(
