@@ -1,5 +1,7 @@
 package engine;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
@@ -8,13 +10,89 @@ import engine.MoveOrdering;
 public class SearchEngine {
 
     private static final int INF = 1_000_000;
+    private static final int MAX_DEPTH = 64;
+    private static final int[][] killerMoves =
+            new int[MAX_DEPTH][2];
     private static long nodes;
     public static boolean DEBUG = false;
     private static final Map<Long, TTEntry> tt = new HashMap<>();
 
+    static {
+        for(int[] moves : killerMoves) {
+            Arrays.fill(moves, -1);
+        }
+    }
+
     public static long getNodes() {
         return nodes;
     }
+
+    private static void recordKiller(
+            int depth,
+            int move
+    ) {
+        if(depth < 0 || depth >= MAX_DEPTH ||
+           killerMoves[depth][0] == move ||
+           killerMoves[depth][1] == move) {
+            return;
+        }
+
+        killerMoves[depth][1] =
+                killerMoves[depth][0];
+
+        killerMoves[depth][0] = move;
+    }
+
+    private static int killerScore(
+            int depth,
+            int move
+    ) {
+        if(depth < 0 || depth >= MAX_DEPTH) {
+            return 0;
+        }
+
+        if(killerMoves[depth][0] == move) {
+            return 100000;
+        }
+
+        if(killerMoves[depth][1] == move) {
+            return 50000;
+        }
+
+        return 0;
+    }
+
+    private static List<Integer> orderMovesWithKillers(
+            Board board,
+            boolean myTurn,
+            int ttMove,
+            int depth
+    ) {
+        List<Integer> moves =
+                MoveOrdering.orderedMoves(
+                        board,
+                        myTurn,
+                        ttMove
+                );
+
+        moves.sort(
+                Comparator
+                        .comparingInt(
+                                (Integer move) ->
+                                        move == ttMove ? 1 : 0
+                        )
+                        .thenComparingInt(
+                                move -> killerScore(
+                                        depth,
+                                        move
+                                )
+                        )
+                        .reversed()
+        );
+
+        return moves;
+    }
+
     public static SearchResult bestMove(
             Board board,
             int depth
@@ -100,7 +178,7 @@ return new SearchResult(
         }
         if(depth == 0 || board.isGameOver()) {
                 int eval = Evaluator.evaluate(board);
-                tt.put(key, new TTEntry(depth,eval));
+                tt.put(key, new TTEntry(depth,eval, -1));
                 return eval;
         }
 
@@ -152,7 +230,8 @@ int score =
         key,
         new TTEntry(
                 depth,
-                value
+                value,
+                -1
         )
 );
             return value;
@@ -204,7 +283,8 @@ tt.put(
         key,
         new TTEntry(
                 depth,
-                value
+                value,
+                -1
         )
 );
 
@@ -257,6 +337,11 @@ private static PVResult alphaBetaPV(
 
     TTEntry entry = tt.get(key);
 
+    int ttMove = -1;
+    if(entry != null) {
+        ttMove = entry.bestMove();
+    }
+
     if(entry != null &&
        entry.depth() >= depth) {
 
@@ -275,7 +360,8 @@ if(depth == 0 || board.isGameOver()) {
             key,
             new TTEntry(
                     depth,
-                    eval
+                    eval,
+                    -1
             )
     );
 
@@ -293,9 +379,11 @@ if(depth == 0 || board.isGameOver()) {
         int bestScore = -INF;
 
 for(int move :
-        MoveOrdering.orderedMoves(
+        orderMovesWithKillers(
                 board,
-                true
+                true,
+                ttMove,
+                depth
         )) {
 
             MoveResult result =
@@ -339,16 +427,24 @@ for(int move :
                             bestScore
                     );
 
-            if(beta <= alpha)
+            if(beta <= alpha) {
+                recordKiller(
+                        depth,
+                        move
+                );
                 break;
+            }
         }
 
 tt.put(
         key,
-        new TTEntry(
-                depth,
-                bestScore
-        )
+new TTEntry(
+        depth,
+        bestScore,
+        bestLine.isEmpty()
+                ? -1
+                : bestLine.get(0)
+)
 );
 
 return new PVResult(
@@ -360,9 +456,11 @@ return new PVResult(
     int bestScore = INF;
 
 for(int move :
-        MoveOrdering.orderedMoves(
+        orderMovesWithKillers(
                 board,
-                false
+                false,
+                ttMove,
+                depth
         )) {
 
         MoveResult result =
@@ -409,16 +507,24 @@ for(int move :
                         bestScore
                 );
 
-        if(beta <= alpha)
+        if(beta <= alpha) {
+            recordKiller(
+                    depth,
+                    move
+            );
             break;
+        }
     }
 
 tt.put(
         key,
-        new TTEntry(
-                depth,
-                bestScore
-        )
+new TTEntry(
+        depth,
+        bestScore,
+        bestLine.isEmpty()
+                ? -1
+                : bestLine.get(0)
+)
 );
 
 return new PVResult(
@@ -428,4 +534,3 @@ return new PVResult(
 }
 
 }
-

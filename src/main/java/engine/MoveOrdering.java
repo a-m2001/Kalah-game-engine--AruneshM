@@ -41,7 +41,36 @@ public class MoveOrdering {
 
         return moves;
     }
+public static List<Integer> orderedMoves(
+        Board board,
+        boolean myTurn,
+        int ttMove
+) {
 
+    List<Integer> moves =
+            orderedMoves(
+                    board,
+                    myTurn
+            );
+
+    if(ttMove == -1) {
+        return moves;
+    }
+
+    if(moves.remove(
+            Integer.valueOf(
+                    ttMove
+            )
+    )) {
+
+        moves.add(
+                0,
+                ttMove
+        );
+    }
+
+    return moves;
+}
     private static int scoreMove(
             Board board,
             int move,

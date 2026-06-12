@@ -14,7 +14,7 @@ public class CommandProcessor {
     private Board board = new Board();
     private SearchResult lastSearch;
 
-private void printPV(List<Integer> pv) {
+private void printPV(Board board, List<Integer> pv) {
 
     if (pv == null || pv.isEmpty()) {
         return;
@@ -24,6 +24,7 @@ private void printPV(List<Integer> pv) {
     System.out.println("Expected Line:");
 
     boolean myTurn = true;
+    Board current = board.copy();
 
     for (int move : pv) {
 
@@ -42,7 +43,18 @@ private void printPV(List<Integer> pv) {
             );
         }
 
-        myTurn = !myTurn;
+        MoveResult result =
+                KalahRules.applyMove(
+                        current,
+                        move,
+                        myTurn
+                );
+
+        current = result.board();
+
+        if(!result.extraTurn()) {
+            myTurn = !myTurn;
+        }
     }
 
     System.out.println();
@@ -149,6 +161,7 @@ private void printPV(List<Integer> pv) {
                                     + result.score());
 
 printPV(
+        board,
         result.line()
 );
 
