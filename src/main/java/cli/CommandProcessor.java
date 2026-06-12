@@ -261,6 +261,33 @@ case "playbest" -> {
                                     + searchDepth);
                 }
 
+                case "endgame" -> {
+
+                    int threshold =
+                            Integer.parseInt(parts[1]);
+
+                    SearchEngine.setEndgameThreshold(
+                            threshold
+                    );
+
+                    System.out.println(
+                            "Endgame threshold set to "
+                                    + threshold
+                    );
+                }
+
+                case "settings" -> {
+
+                    System.out.println(
+                            "Search Depth: " + searchDepth
+                    );
+
+                    System.out.println(
+                            "Endgame Threshold: "
+                                    + SearchEngine.getEndgameThreshold()
+                    );
+                }
+
                 default ->
 
                     System.out.println(
@@ -271,6 +298,8 @@ case "playbest" -> {
                                     "opp <pit>\n" +
                                     "stores\n" +
                                     "benchmark\n" +
+                                    "endgame <threshold>\n" +
+                                    "settings\n" +
                                     "quit");
             }
 

@@ -10,7 +10,7 @@ import engine.MoveOrdering;
 public class SearchEngine {
 
     private static final int INF = 1_000_000;
-    private static final int ENDGAME_THRESHOLD = 16;
+    private static int endgameThreshold = 16;
     private static final int EXACT_DEPTH = Integer.MAX_VALUE;
     private static final long MAXIMIZING_TURN_KEY =
             0x6A09E667F3BCC909L;
@@ -34,6 +34,20 @@ public class SearchEngine {
 
     public static long getTTHits() {
         return ttHits;
+    }
+
+    public static void setEndgameThreshold(int value) {
+        if(value < 0) {
+            throw new IllegalArgumentException(
+                    "Endgame threshold must be non-negative"
+            );
+        }
+
+        endgameThreshold = value;
+    }
+
+    public static int getEndgameThreshold() {
+        return endgameThreshold;
     }
 
     private static long positionKey(
@@ -548,7 +562,7 @@ if(board.isGameOver()) {
     );
 }
 
-if(remainingStones(board) <= ENDGAME_THRESHOLD) {
+if(remainingStones(board) <= endgameThreshold) {
 
     int score =
             solveEndgame(
