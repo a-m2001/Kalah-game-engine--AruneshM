@@ -151,6 +151,12 @@ private void printPV(Board board, List<Integer> pv) {
                             board,
                             searchDepth);
                     SearchResult result = lastSearch;
+
+                    if(SearchEngine.wasBookMoveUsed()) {
+                        System.out.println(
+                                "Book Move Used"
+                        );
+                    }
                     
                     System.out.println(
                             "Best move: "
@@ -193,6 +199,12 @@ printPV(
                     SearchResult result = lastSearch;
 
                     System.out.println("Benchmark");
+
+                    if(SearchEngine.wasBookMoveUsed()) {
+                        System.out.println(
+                                "Book Move Used"
+                        );
+                    }
 
                     System.out.println(
                             "Depth: " + searchDepth

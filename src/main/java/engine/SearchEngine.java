@@ -19,6 +19,7 @@ public class SearchEngine {
             new int[MAX_DEPTH][2];
     private static long nodes;
     private static long ttHits;
+    private static boolean bookMoveUsed;
     public static boolean DEBUG = false;
     private static final Map<Long, TTEntry> tt = new HashMap<>();
 
@@ -34,6 +35,10 @@ public class SearchEngine {
 
     public static long getTTHits() {
         return ttHits;
+    }
+
+    public static boolean wasBookMoveUsed() {
+        return bookMoveUsed;
     }
 
     public static void setEndgameThreshold(int value) {
@@ -283,6 +288,20 @@ public class SearchEngine {
     ) {
 nodes = 0;
 tt.clear();
+bookMoveUsed = false;
+
+Integer bookMove =
+        OpeningBook.lookup(board);
+
+if(bookMove != null) {
+    bookMoveUsed = true;
+
+    return new SearchResult(
+            bookMove,
+            0,
+            List.of(bookMove)
+    );
+}
 
 int bestMove = -1;
 int bestScore = -INF;
@@ -495,6 +514,11 @@ public static SearchResult iterativeDeepening(
                         board,
                         depth
                 );
+
+        if(bookMoveUsed) {
+            break;
+        }
+
         if(DEBUG){
         System.out.println(
                 "Depth "
