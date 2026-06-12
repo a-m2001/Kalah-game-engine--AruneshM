@@ -170,6 +170,52 @@ printPV(
                                     + SearchEngine.getNodes());
                 }
 
+                case "benchmark" -> {
+
+                    SearchEngine.DEBUG = false;
+
+                    long start =
+                            System.nanoTime();
+
+                    lastSearch =
+                            SearchEngine.iterativeDeepening(
+                                    board,
+                                    searchDepth
+                            );
+
+                    long elapsed =
+                            System.nanoTime() - start;
+
+                    SearchResult result = lastSearch;
+
+                    System.out.println("Benchmark");
+
+                    System.out.println(
+                            "Depth: " + searchDepth
+                    );
+
+                    System.out.println(
+                            "Best Move: " + result.move()
+                    );
+
+                    System.out.println(
+                            "Score: " + result.score()
+                    );
+
+                    System.out.println(
+                            "Nodes: " + SearchEngine.getNodes()
+                    );
+
+                    System.out.println(
+                            "Time: " + elapsed / 1_000_000 + " ms"
+                    );
+
+                    printPV(
+                            board,
+                            result.line()
+                    );
+                }
+
 case "playbest" -> {
 
     if(lastSearch == null) {
@@ -216,6 +262,7 @@ case "playbest" -> {
                                     "my <pit>\n" +
                                     "opp <pit>\n" +
                                     "stores\n" +
+                                    "benchmark\n" +
                                     "quit");
             }
 
