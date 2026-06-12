@@ -20,6 +20,7 @@ public class SearchEngine {
             int depth
     ) {
 nodes = 0;
+tt.clear();
 
 int bestMove = -1;
 int bestScore = -INF;
@@ -265,16 +266,24 @@ private static PVResult alphaBetaPV(
         );
     }
 
-    if(depth == 0 || board.isGameOver()) {
+if(depth == 0 || board.isGameOver()) {
 
-        int eval =
-                Evaluator.evaluate(board);
+    int eval =
+            Evaluator.evaluate(board);
 
-        return new PVResult(
-                eval,
-                new ArrayList<>()
-        );
-    }
+    tt.put(
+            key,
+            new TTEntry(
+                    depth,
+                    eval
+            )
+    );
+
+    return new PVResult(
+            eval,
+            new ArrayList<>()
+    );
+}
 
     List<Integer> bestLine =
             new ArrayList<>();
@@ -283,10 +292,11 @@ private static PVResult alphaBetaPV(
 
         int bestScore = -INF;
 
-        for(int move=0; move<6; move++) {
-
-            if(board.pits()[move] == 0)
-                continue;
+for(int move :
+        MoveOrdering.orderedMoves(
+                board,
+                true
+        )) {
 
             MoveResult result =
                     KalahRules.applyMove(
@@ -333,18 +343,27 @@ private static PVResult alphaBetaPV(
                 break;
         }
 
-        return new PVResult(
-                bestScore,
-                bestLine
-        );
+tt.put(
+        key,
+        new TTEntry(
+                depth,
+                bestScore
+        )
+);
+
+return new PVResult(
+        bestScore,
+        bestLine
+);
     }
 
     int bestScore = INF;
 
-    for(int move=7; move<13; move++) {
-
-        if(board.pits()[move] == 0)
-            continue;
+for(int move :
+        MoveOrdering.orderedMoves(
+                board,
+                false
+        )) {
 
         MoveResult result =
                 KalahRules.applyMove(
@@ -394,10 +413,18 @@ private static PVResult alphaBetaPV(
             break;
     }
 
-    return new PVResult(
-            bestScore,
-            bestLine
-    );
+tt.put(
+        key,
+        new TTEntry(
+                depth,
+                bestScore
+        )
+);
+
+return new PVResult(
+        bestScore,
+        bestLine
+);
 }
 
 }
