@@ -98,7 +98,7 @@ public class CommandProcessor {
                     System.out.println(
                             "Thinking...");
 
-                    SearchResult result = SearchEngine.bestMove(
+                    SearchResult result = SearchEngine.iterativeDeepening(
                             board,
                             searchDepth);
 
@@ -109,11 +109,16 @@ public class CommandProcessor {
                     System.out.println(
                             "Score: "
                                     + result.score());
+
+                        System.out.println(
+        "Nodes: "
+        + SearchEngine.getNodes()
+);
                 }
 
                 case "playbest" -> {
 
-                    SearchResult result = SearchEngine.bestMove(
+                    SearchResult result = SearchEngine.iterativeDeepening(
                             board,
                             searchDepth);
 

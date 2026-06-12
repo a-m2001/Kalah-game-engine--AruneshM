@@ -1,12 +1,18 @@
 package engine;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SearchEngine {
 
     private static final int INF = 1_000_000;
     private static long nodes;
-    
+    private static final Map<Long, TTEntry> tt = new HashMap<>();
+
+    public static long getNodes() {
+        return nodes;
+    }
     public static SearchResult bestMove(
             Board board,
             int depth
@@ -14,6 +20,7 @@ public class SearchEngine {
         List<Integer> bestLine = new ArrayList<>();
         int bestMove = -1;
         int bestScore = -INF;
+        nodes = 0;
 
         for(int move=0; move<6; move++) {
 
@@ -59,9 +66,17 @@ public class SearchEngine {
             int beta,
             boolean maximizing
     ) {
+        nodes++;
+        long key = board.hash();
+        TTEntry entry = tt.get(key);
 
+        if (entry != null && entry.depth() >= depth) {
+                return entry.score();
+        }
         if(depth == 0 || board.isGameOver()) {
-            return Evaluator.evaluate(board);
+                int eval = Evaluator.evaluate(board);
+                tt.put(key, new TTEntry(depth,eval));
+                return eval;
         }
 
         if(maximizing) {
@@ -102,7 +117,13 @@ public class SearchEngine {
                 if(beta <= alpha)
                     break;
             }
-
+            tt.put(
+        key,
+        new TTEntry(
+                depth,
+                value
+        )
+);
             return value;
         }
 
@@ -143,6 +164,44 @@ public class SearchEngine {
                 break;
         }
 
+tt.put(
+        key,
+        new TTEntry(
+                depth,
+                value
+        )
+);
+
         return value;
     }
+
+public static SearchResult iterativeDeepening(
+        Board board,
+        int maxDepth
+) {
+
+    SearchResult best = null;
+
+    for(int depth = 1;
+        depth <= maxDepth;
+        depth++) {
+
+        best =
+                bestMove(
+                        board,
+                        depth
+                );
+
+        System.out.println(
+                "Depth "
+                + depth
+                + " complete"
+        );
+    }
+
+    return best;
 }
+
+
+}
+

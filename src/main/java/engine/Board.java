@@ -68,6 +68,14 @@ public class Board {
         pits[13] += opp;
     }
 
+    public long hash() {
+        long h = 0;
+        for (int i = 0; i < 14; i++) {
+            h = h * 1315423911L + pits[i];
+        }
+    return h;
+    }
+
     public void print() {
 
         System.out.println();
