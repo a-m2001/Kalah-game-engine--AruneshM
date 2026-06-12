@@ -18,6 +18,7 @@ public class SearchEngine {
     private static final int[][] killerMoves =
             new int[MAX_DEPTH][2];
     private static long nodes;
+    private static long ttHits;
     public static boolean DEBUG = false;
     private static final Map<Long, TTEntry> tt = new HashMap<>();
 
@@ -29,6 +30,10 @@ public class SearchEngine {
 
     public static long getNodes() {
         return nodes;
+    }
+
+    public static long getTTHits() {
+        return ttHits;
     }
 
     private static long positionKey(
@@ -107,6 +112,7 @@ public class SearchEngine {
 
         if(entry != null &&
            entry.depth() == EXACT_DEPTH) {
+            ttHits++;
             return entry.score();
         }
 
@@ -339,6 +345,7 @@ return new SearchResult(
         TTEntry entry = tt.get(key);
 
         if (entry != null && entry.depth() >= depth) {
+                ttHits++;
                 return entry.score();
         }
         if(depth == 0 || board.isGameOver()) {
@@ -461,6 +468,8 @@ public static SearchResult iterativeDeepening(
         int maxDepth
 ) {
 
+    ttHits = 0;
+
     SearchResult best = null;
 
     for(int depth = 1;
@@ -511,6 +520,8 @@ private static PVResult alphaBetaPV(
     if(entry != null &&
        (entry.depth() == EXACT_DEPTH ||
         entry.depth() >= depth)) {
+
+        ttHits++;
 
         return new PVResult(
                 entry.score(),

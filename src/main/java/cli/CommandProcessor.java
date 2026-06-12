@@ -168,6 +168,10 @@ printPV(
                     System.out.println(
                              "Nodes: "
                                     + SearchEngine.getNodes());
+
+                    System.out.println(
+                            "TT Hits: "
+                                    + SearchEngine.getTTHits());
                 }
 
                 case "benchmark" -> {
@@ -204,6 +208,10 @@ printPV(
 
                     System.out.println(
                             "Nodes: " + SearchEngine.getNodes()
+                    );
+
+                    System.out.println(
+                            "TT Hits: " + SearchEngine.getTTHits()
                     );
 
                     System.out.println(
