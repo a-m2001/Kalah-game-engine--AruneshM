@@ -10,6 +10,10 @@ import engine.MoveOrdering;
 public class SearchEngine {
 
     private static final int INF = 1_000_000;
+    private static final int ENDGAME_THRESHOLD = 16;
+    private static final int EXACT_DEPTH = Integer.MAX_VALUE;
+    private static final long MAXIMIZING_TURN_KEY =
+            0x6A09E667F3BCC909L;
     private static final int MAX_DEPTH = 64;
     private static final int[][] killerMoves =
             new int[MAX_DEPTH][2];
@@ -25,6 +29,166 @@ public class SearchEngine {
 
     public static long getNodes() {
         return nodes;
+    }
+
+    private static long positionKey(
+            Board board,
+            boolean maximizing
+    ) {
+        long key = Zobrist.hash(board);
+
+        if(maximizing) {
+            key ^= MAXIMIZING_TURN_KEY;
+        }
+
+        return key;
+    }
+
+    private static int remainingStones(
+            Board board
+    ) {
+        int total = 0;
+
+        for(int pit = 0; pit < 6; pit++) {
+            total += board.pits()[pit];
+        }
+
+        for(int pit = 7; pit < 13; pit++) {
+            total += board.pits()[pit];
+        }
+
+        return total;
+    }
+
+    private static int terminalScore(
+            Board board
+    ) {
+        Board terminal = board.copy();
+        terminal.collectRemaining();
+
+        return 10000 *
+                (
+                        terminal.pits()[6]
+                        -
+                        terminal.pits()[13]
+                );
+    }
+
+    private static int solveEndgame(
+            Board board,
+            boolean maximizing
+    ) {
+        return solveEndgame(
+                board,
+                maximizing,
+                -INF,
+                INF
+        );
+    }
+
+    private static int solveEndgame(
+            Board board,
+            boolean maximizing,
+            int alpha,
+            int beta
+    ) {
+        nodes++;
+
+        int originalAlpha = alpha;
+        int originalBeta = beta;
+
+        long key =
+                positionKey(
+                        board,
+                        maximizing
+                );
+
+        TTEntry entry = tt.get(key);
+
+        if(entry != null &&
+           entry.depth() == EXACT_DEPTH) {
+            return entry.score();
+        }
+
+        if(board.isGameOver()) {
+            int score = terminalScore(board);
+
+            tt.put(
+                    key,
+                    new TTEntry(
+                            EXACT_DEPTH,
+                            score,
+                            -1
+                    )
+            );
+
+            return score;
+        }
+
+        int bestScore =
+                maximizing ? -INF : INF;
+
+        int bestMove = -1;
+        boolean cutoff = false;
+
+        for(int move :
+                MoveOrdering.orderedMoves(
+                        board,
+                        maximizing
+                )) {
+
+            MoveResult result =
+                    KalahRules.applyMove(
+                            board,
+                            move,
+                            maximizing
+                    );
+
+            boolean nextMaximizing =
+                    result.extraTurn()
+                            ? maximizing
+                            : !maximizing;
+
+            int score =
+                    solveEndgame(
+                            result.board(),
+                            nextMaximizing,
+                            alpha,
+                            beta
+                    );
+
+            if((maximizing && score > bestScore) ||
+               (!maximizing && score < bestScore)) {
+                bestScore = score;
+                bestMove = move;
+            }
+
+            if(maximizing) {
+                alpha = Math.max(alpha, bestScore);
+            } else {
+                beta = Math.min(beta, bestScore);
+            }
+
+            if(beta <= alpha) {
+                cutoff = true;
+                break;
+            }
+        }
+
+        if(!cutoff &&
+           bestScore > originalAlpha &&
+           bestScore < originalBeta) {
+            tt.put(
+                    key,
+                    new TTEntry(
+                            EXACT_DEPTH,
+                            bestScore,
+                            bestMove
+                    )
+            );
+        }
+
+        return bestScore;
     }
 
     private static void recordKiller(
@@ -168,9 +332,10 @@ return new SearchResult(
     ) {
         nodes++;
         long key =
-        Zobrist.hash(
-                board
-        );
+                positionKey(
+                        board,
+                        maximizing
+                );
         TTEntry entry = tt.get(key);
 
         if (entry != null && entry.depth() >= depth) {
@@ -331,9 +496,10 @@ private static PVResult alphaBetaPV(
     nodes++;
 
     long key =
-        Zobrist.hash(
-                board
-        );
+            positionKey(
+                    board,
+                    maximizing
+            );
 
     TTEntry entry = tt.get(key);
 
@@ -343,7 +509,8 @@ private static PVResult alphaBetaPV(
     }
 
     if(entry != null &&
-       entry.depth() >= depth) {
+       (entry.depth() == EXACT_DEPTH ||
+        entry.depth() >= depth)) {
 
         return new PVResult(
                 entry.score(),
@@ -351,7 +518,40 @@ private static PVResult alphaBetaPV(
         );
     }
 
-if(depth == 0 || board.isGameOver()) {
+if(board.isGameOver()) {
+
+    int score = terminalScore(board);
+
+    tt.put(
+            key,
+            new TTEntry(
+                    EXACT_DEPTH,
+                    score,
+                    -1
+            )
+    );
+
+    return new PVResult(
+            score,
+            new ArrayList<>()
+    );
+}
+
+if(remainingStones(board) <= ENDGAME_THRESHOLD) {
+
+    int score =
+            solveEndgame(
+                    board,
+                    maximizing
+            );
+
+    return new PVResult(
+            score,
+            new ArrayList<>()
+    );
+}
+
+if(depth == 0) {
 
     int eval =
             Evaluator.evaluate(board);
