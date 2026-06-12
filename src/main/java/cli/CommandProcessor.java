@@ -1,5 +1,7 @@
 package cli;
 
+import java.util.List;
+
 import engine.Board;
 import engine.KalahRules;
 import engine.MoveResult;
@@ -11,6 +13,40 @@ public class CommandProcessor {
     private int searchDepth = 8;
     private Board board = new Board();
     private SearchResult lastSearch;
+
+private void printPV(List<Integer> pv) {
+
+    if (pv == null || pv.isEmpty()) {
+        return;
+    }
+
+    System.out.println();
+    System.out.println("Expected Line:");
+
+    boolean myTurn = true;
+
+    for (int move : pv) {
+
+        if (myTurn) {
+
+            System.out.println(
+                    "You -> pit " + move
+            );
+
+        } else {
+
+            int oppPit = 12 - move;
+
+            System.out.println(
+                    "Opp -> pit " + oppPit
+            );
+        }
+
+        myTurn = !myTurn;
+    }
+
+    System.out.println();
+}
 
     public void execute(String line) {
 
@@ -112,9 +148,9 @@ public class CommandProcessor {
                             "Score: "
                                     + result.score());
 
-                    System.out.println(
-                            "PV: "
-                                    + result.line());
+printPV(
+        result.line()
+);
 
                     System.out.println(
                              "Nodes: "
